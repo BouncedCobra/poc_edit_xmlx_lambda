@@ -18,29 +18,22 @@ def lambda_handler(event, context):
         response = s3.get_object(Bucket=bucket, Key=key)
         data = response['Body'].read()
 
-        # Leer la hoja 'TITULAR' del archivo Excel
         with io.BytesIO(data) as input_stream:
             workbook = load_workbook(input_stream)
+            # Leer la hoja TITULAR y modificar los datos
             titular_sheet = workbook['TITULAR']
+
+            titular_sheet = modify_excel(titular_sheet, 'B18', 'Sergio Andres')
+
+            titular_sheet = modify_excel(titular_sheet, 'B20', 'Trujillo')
+
+            titular_sheet = modify_excel(titular_sheet, 'B22', 'Garcia')
+
+            titular_sheet = modify_excel(titular_sheet, 'L18', None)
+
+            # Leer la hoja OPERATIVIDAD y modificar los datos
             operatividad_sheet = workbook['OPERATIVIDAD']
-
-            # Verificar si la celda B18 es parte de un rango combinado
-            for merged_cell in titular_sheet.merged_cells.ranges:
-                if 'B18' in merged_cell:
-                    # Modificar la celda superior izquierda del rango combinado
-                    titular_sheet[merged_cell.coord.split(':')[0]].value = 'Sergio Trujillo'
-                    break
-                else:
-                    # Si no es parte de un rango combinado, modificar la celda directamente
-                    titular_sheet['B18'] = 'Sergio Trujillo'
-
-            # Modificar la celda B18 de la hoja 'OPERATIVIDAD'
-            for merged_cell in operatividad_sheet.merged_cells.ranges:
-                if 'B7' in merged_cell:
-                    operatividad_sheet[merged_cell.coord.split(':')[0]].value = 'Sergio Garcia'
-                    break
-                else:
-                    operatividad_sheet['B7'] = 'Sergio Garcia'
+            operatividad_sheet = modify_excel(operatividad_sheet, 'B7', 'Sergio Garcia')
 
         # Guardar el archivo modificado en S3
         modified_key = 'modified_plantilla.xlsx'
@@ -51,7 +44,7 @@ def lambda_handler(event, context):
 
         return {
             'statusCode': 200,
-            'body': json.dumps('Hello from Lambda!')
+            'body': json.dumps('Archivo modificado guardado en S3')
         }
 
     except Exception as e:
@@ -60,3 +53,15 @@ def lambda_handler(event, context):
             'statusCode': 500,
             'body': json.dumps('Error')
         }
+
+def modify_excel(sheet, point, value):
+    for merged_cell in sheet.merged_cells.ranges:
+        if point in merged_cell:
+            # Modificar la celda superior izquierda del rango combinado
+            sheet[merged_cell.coord.split(':')[0]].value = value
+            break
+        else:
+            # Si no es parte de un rango combinado, modificar la celda directamente
+            sheet[point] = value
+            break
+    return sheet
