@@ -4,6 +4,20 @@ import io
 from openpyxl import load_workbook
 
 s3 = boto3.client('s3')
+titular_data = {
+    'nombre': 'B18',
+    'apellido_paterno': 'B20',
+    'apellido_materno': 'B22',
+    'CURP': 'B24',
+    'RFC': 'B26',
+    'nacionalidad': 'B28',
+    'situacion_laboral': 'B32',
+    'fecha_nacimiento': 'H18',
+    'pais_nacimiento': 'H20',
+    'entidad_nacimiento': 'H22',
+    'estado_civil': 'H26',
+    'celular': 'H30',
+}
 
 def lambda_handler(event, context):
     try:
@@ -23,13 +37,11 @@ def lambda_handler(event, context):
             # Leer la hoja TITULAR y modificar los datos
             titular_sheet = workbook['TITULAR']
 
-            titular_sheet = modify_excel(titular_sheet, 'B18', 'Sergio Andres')
+            titular_sheet = modify_excel(titular_sheet, titular_data['nombre'], 'Sergio Andres')
 
-            titular_sheet = modify_excel(titular_sheet, 'B20', 'Trujillo')
+            titular_sheet = modify_excel(titular_sheet, titular_data['apellido_paterno'], 'Trujillo')
 
-            titular_sheet = modify_excel(titular_sheet, 'B22', 'Garcia')
-
-            titular_sheet = modify_excel(titular_sheet, 'L18', None)
+            titular_sheet = modify_excel(titular_sheet, titular_data['apellido_materno'], 'Garcia')
 
             # Leer la hoja OPERATIVIDAD y modificar los datos
             operatividad_sheet = workbook['OPERATIVIDAD']
